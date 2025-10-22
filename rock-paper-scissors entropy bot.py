@@ -8,7 +8,16 @@ MOVE_NAMES = {'R': 'Rock', 'P': 'Paper', 'S': 'Scissors'}
 C = 0.9581989927330705  # Constant for calculating recent rounds
 e = math.e              # Mathematical constant e
 
+class randomBot:
+    def __init__(self, rounds):
+        self.name = "EntropyBot"
+        self.rounds = rounds
+    
+    def decide_move(self):
+        bot_move = random.choice(['R', 'P', 'S'])
+        return bot_move
 
+    
 class EntropyBot:
     """
     A Rock-Paper-Scissors bot that uses entropy and softmax decision making
@@ -62,7 +71,7 @@ class EntropyBot:
             empirical_prob_moves = [1/3, 1/3, 1/3]
         else:
             empirical_prob_moves = [(self.moves_count_decay[j] + self.a)/(n + 3*self.a) for j in range(3)]
-        print(f"{empirical_prob_moves}")
+        # print(f"{empirical_prob_moves}")
         
         # calculate entropy
         entropy = -sum(p * math.log2(p) for p in empirical_prob_moves if p > 0)
@@ -72,9 +81,9 @@ class EntropyBot:
         expected_utility_all_time = [empirical_prob_moves[(j - 1) % 3] for j in range(3)]
         expected_utility_recent = [self.empirical_prob_recent[(j - 1) % 3] for j in range(3)]
         expected_utility = [expected_utility_all_time[ii] + self.b * expected_utility_recent[ii] for ii in range(3)]
-        print(f"Expected utility all time: {expected_utility_all_time}")
-        print(f"Expected utility recent: {expected_utility_recent}")
-        print(f"Expected utility: {expected_utility}")
+        # print(f"Expected utility all time: {expected_utility_all_time}")
+        # print(f"Expected utility recent: {expected_utility_recent}")
+        # print(f"Expected utility: {expected_utility}")
         
         # start random to test the waters
         if valid_rounds < (round(self.k/2)):
@@ -86,7 +95,7 @@ class EntropyBot:
         else:
             # map entropy to inverse temperature beta
             beta = self.beta_max * (Hmax - entropy) / Hmax
-            print(f"Beta (inverse temperature): {beta:.3f}")
+            # print(f"Beta (inverse temperature): {beta:.3f}")
             
             # compute expected utility for each move
             probs = empirical_prob_moves
@@ -95,14 +104,14 @@ class EntropyBot:
                 probs[0] - probs[2],  # Paper wins Rock, loses to Scissors
                 probs[1] - probs[0]   # Scissors wins Paper, loses to Rock
             ]
-            print(f"EU for [R, P, S]: {EU}")
+            # print(f"EU for [R, P, S]: {EU}")
             
             # softmax to get adaptive action probabilities
             maxEU = max(EU)
             expEU = [math.exp(beta * (u - maxEU)) for u in EU]
             Z = sum(expEU)
             softmax_probs = [x / Z for x in expEU]
-            print(f"Softmax probabilities: {softmax_probs}")
+            # print(f"Softmax probabilities: {softmax_probs}")
             
             # sample a move using those probabilities
             r = random.random()
@@ -113,7 +122,7 @@ class EntropyBot:
                 if r < cumulative:
                     bot_move = ['R', 'P', 'S'][j]
                     break
-            print("Bot strategy: Entropy-based softmax")
+            # print("Bot strategy: Entropy-based softmax")
         
         return bot_move
     
@@ -123,7 +132,7 @@ class EntropyBot:
         """
         # Update recent moves memory
         self.deque_temp_moves_count.append(user_move)
-        print(self.deque_temp_moves_count)
+        # print(self.deque_temp_moves_count)
         if len(self.deque_temp_moves_count) > self.k:
             self.deque_temp_moves_count.pop(0)
         
@@ -141,7 +150,7 @@ class EntropyBot:
             self.empirical_prob_recent = [0, 0, 0]
         else:
             self.empirical_prob_recent = [c / recent_n for c in recent_counts]
-        print(f"Recent empirical probabilities: {self.empirical_prob_recent}")
+        # print(f"Recent empirical probabilities: {self.empirical_prob_recent}")
         
         # Update move counts with decay
         self.moves_count_decay[:] = [self.gamma * c for c in self.moves_count_decay]
@@ -174,10 +183,10 @@ class Game:
             print("Invalid move, please choose R, P or S")
             return False
         
-        # Update bot's state
+        # Update bot state
         self.bot.update_state(user_move)
         
-        # Display bot's move
+        # Display bot move
         print(f"Bot played {MOVE_NAMES[bot_move]}")
         
         # Calculate scores

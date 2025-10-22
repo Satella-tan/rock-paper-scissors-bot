@@ -1,6 +1,7 @@
 import random
 import math
 from collections import Counter
+from abc import ABC, abstractmethod
 
 # Constants
 MOVE_INDEX = {'R': 0, 'P': 1, 'S': 2}
@@ -8,21 +9,35 @@ MOVE_NAMES = {'R': 'Rock', 'P': 'Paper', 'S': 'Scissors'}
 C = 0.9581989927330705  # Constant for calculating recent rounds
 e = math.e              # Mathematical constant e
 
-class randomBot:
+
+class Player(ABC):
+    @abstractmethod
+    def decide_move(self):
+        pass
+
+class randomBot(Player):
     def __init__(self, rounds):
-        self.name = "EntropyBot"
+        self.name = "RandomBot"
         self.rounds = rounds
     
     def decide_move(self):
         bot_move = random.choice(['R', 'P', 'S'])
         return bot_move
 
+class humanPlayer(Player):
+    def __init__(self, rounds):
+        self.name = "HumanPlayer"
+        self.rounds = rounds
     
-class EntropyBot:
-    """
-    A Rock-Paper-Scissors bot that uses entropy and softmax decision making
-    to adapt to the player's strategy.
-    """
+    def decide_move(self):
+        # Get user move
+        user_move = input("What move would you like to play? (R,P,S): ").upper()
+        if user_move not in MOVE_INDEX:
+            print("Invalid move, please choose R, P or S")
+            return False
+        return user_move
+
+class EntropyBot(Player):
     
     def __init__(self, rounds=15):
         self.name = "EntropyBot"
@@ -177,11 +192,9 @@ class Game:
         # Bot decides its move
         bot_move = self.bot.decide_move(self.valid_rounds)
         
-        # Get user move
-        user_move = input("What move would you like to play? (R,P,S): ").upper()
-        if user_move not in MOVE_INDEX:
-            print("Invalid move, please choose R, P or S")
-            return False
+        # Get player move
+        user_move = player.decide_move() 
+        
         
         # Update bot state
         self.bot.update_state(user_move)
@@ -224,6 +237,11 @@ class Game:
 # Main execution
 if __name__ == "__main__":
     rounds = int(input("How many rounds would you like to play? "))
-    bot = EntropyBot(rounds)
+    player = int(input("Would you like to play against a bot (1) or have a bot play my bot (2)? "))
+    if player == 1:
+        bot = EntropyBot(rounds)
+        player = humanPlayer()
+    else:
+        bot = randomBot(rounds)
     game = Game(bot, rounds)
     game.play_game()

@@ -12,7 +12,7 @@ e = math.e              # Mathematical constant e
 
 class Player(ABC):
     @abstractmethod
-    def decide_move(self):
+    def decide_move(self, valid_rounds):
         pass
 
 class randomBot(Player):
@@ -20,21 +20,24 @@ class randomBot(Player):
         self.name = "RandomBot"
         self.rounds = rounds
     
-    def decide_move(self):
-        bot_move = random.choice(['R', 'P', 'S'])
-        return bot_move
+    def decide_move(self, valid_rounds):
+        user_move = random.choice(['R', 'P', 'S'])
+        return user_move
 
 class humanPlayer(Player):
     def __init__(self, rounds):
         self.name = "HumanPlayer"
         self.rounds = rounds
     
-    def decide_move(self):
+    def decide_move(self, valid_rounds):    
         # Get user move
-        user_move = input("What move would you like to play? (R,P,S): ").upper()
-        if user_move not in MOVE_INDEX:
-            print("Invalid move, please choose R, P or S")
-            return False
+        do_while = True
+        while do_while:
+            user_move = input("What move would you like to play? (R,P,S): ").upper()
+            if user_move not in MOVE_INDEX:
+                print("Invalid move, please choose R, P or S")
+            else:
+                do_while = False
         return user_move
 
 class EntropyBot(Player):
@@ -174,12 +177,10 @@ class EntropyBot(Player):
 
 
 class Game:
-    """
-    Manages a Rock-Paper-Scissors game between a bot and a human player.
-    """
     
-    def __init__(self, bot, rounds=15):
+    def __init__(self, bot, player1, rounds):
         self.bot = bot
+        self.player1 = player1
         self.rounds = rounds
         self.user_score = 0
         self.bot_score = 0
@@ -193,7 +194,7 @@ class Game:
         bot_move = self.bot.decide_move(self.valid_rounds)
         
         # Get player move
-        user_move = player.decide_move() 
+        user_move = self.player1.decide_move(self.valid_rounds)
         
         
         # Update bot state
@@ -228,20 +229,24 @@ class Game:
                 continue
         
         # Print final results
-        print(f"Your score : {self.user_score} | Bot score : {self.bot_score}")
-        print(f"Your moves :")
+        print(f"Player1 score : {self.user_score} | Bot score : {self.bot_score}")
+        print(f"Player1 moves :")
         for move, idx in MOVE_INDEX.items():
-            print(f"- You played {MOVE_NAMES[move]}: {self.bot.moves_count_real[idx]}")
+            print(f"- P1 played {MOVE_NAMES[move]}: {self.bot.moves_count_real[idx]}")
+
+
+
 
 
 # Main execution
 if __name__ == "__main__":
     rounds = int(input("How many rounds would you like to play? "))
-    player = int(input("Would you like to play against a bot (1) or have a bot play my bot (2)? "))
-    if player == 1:
+    playermode = int(input("Would you like to play against a bot (1) or have a bot play my bot (2)? "))
+    if playermode == 1:
         bot = EntropyBot(rounds)
-        player = humanPlayer()
+        player1 = humanPlayer(rounds)
     else:
-        bot = randomBot(rounds)
-    game = Game(bot, rounds)
+        bot = EntropyBot(rounds)
+        player1 = randomBot(rounds)
+    game = Game(bot, player1, rounds)
     game.play_game()

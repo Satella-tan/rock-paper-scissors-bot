@@ -2,7 +2,7 @@
 
 Inspired by [Solving Wordle using information theory by 3Blue1Brown](https://www.youtube.com/watch?v=v68zYyaEmEA). This rock, paper, scissors bot is my attempt at implementing information theory and possibly game theory into a project. I plan on adding an interface just like in 3Blue1Brown's video. Aswell, as adding a Markov-Chain EU variable and to test my bot against other bot strategies to see where can it be improved and what data i can collect.
 
-In my experience, if you try to play vs this bot consciously, chances are you will think the bot is making a move after you type in your own; Feels like the bot is cheating. I dont think i have every win a 15+ round game. Feel try to try.
+In my experience, if you try to play vs this bot consciously, chances are you will think the bot is making a move after you type in your own; Feels like the bot is cheating. I dont think i have every win a 15+ round game. Feel free to try.
 
 ## Bot Math & Logic
 

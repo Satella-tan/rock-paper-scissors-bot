@@ -1,3 +1,4 @@
+from itertools import cycle
 import random
 import math
 from collections import Counter
@@ -23,6 +24,29 @@ class randomBot(Player):
     def decide_move(self, valid_rounds):
         user_move = random.choice(['R', 'P', 'S'])
         return user_move
+    
+
+class cyclicBot(Player):
+    def __init__(self, rounds):
+        self.name = "CyclicBot"
+        self.rounds = rounds
+        self.amount_of_rounds_cycle = random.randint(4,7)
+        self.current_round_cycleBot = 0
+        self.cycle = []
+        self.cycle_index = 0
+        print(f"the cycle is {self.amount_of_rounds_cycle} rounds long")
+    def decide_move(self, valid_rounds):
+        if valid_rounds <= self.amount_of_rounds_cycle:
+            user_move = random.choice(['R', 'P', 'S'])
+            self.cycle.append(user_move)
+            # self.current_round_cycleBot += 1
+            return user_move
+        else:
+            user_move = self.cycle[self.cycle_index]
+            self.cycle_index += 1
+            if self.cycle_index == self.amount_of_rounds_cycle:
+                self.cycle_index = 0
+            return user_move
 
 class humanPlayer(Player):
     def __init__(self, rounds):
@@ -195,6 +219,8 @@ class Game:
         
         # Get player move
         user_move = self.player1.decide_move(self.valid_rounds)
+        if self.player1 != humanPlayer:
+            print(f"Player1 played {MOVE_NAMES[user_move]}")
         
         
         # Update bot state
@@ -241,12 +267,43 @@ class Game:
 # Main execution
 if __name__ == "__main__":
     rounds = int(input("How many rounds would you like to play? "))
-    playermode = int(input("Would you like to play against a bot (1) or have a bot play my bot (2)? "))
+    playermode = int(input("Would you like to play against my bot (1) or have a bot play my bot (2)? "))
+    def _walk_subclasses(cls):
+        subs = []
+        for sub in cls.__subclasses__():
+            subs.append(sub)
+            subs.extend(_walk_subclasses(sub))
+        return subs
+
+    available_bot_classes = [
+        c for c in _walk_subclasses(Player)
+        if c.__name__ not in ("humanPlayer", "EntropyBot")
+    ]
+
     if playermode == 1:
         bot = EntropyBot(rounds)
         player1 = humanPlayer(rounds)
     else:
+        if not available_bot_classes:
+            print("No available bot classes to test.")
+            exit(1)
+
+        print("Which bot would you like to test?")
+        for i, cls in enumerate(available_bot_classes, start=1):
+            print(f"{i} - {cls.__name__}")
+
+        selection = input("Enter the number: ").strip()
+        if not selection.isdigit():
+            print("Invalid selection.")
+            exit(1)
+        idx = int(selection)
+        if idx < 1 or idx > len(available_bot_classes):
+            print("Invalid selection.")
+            exit(1)
+
+        SelectedBotCls = available_bot_classes[idx - 1]
+        player1 = SelectedBotCls(rounds)
         bot = EntropyBot(rounds)
-        player1 = randomBot(rounds)
+
     game = Game(bot, player1, rounds)
     game.play_game()

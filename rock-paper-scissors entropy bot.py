@@ -15,6 +15,10 @@ class Player(ABC):
     @abstractmethod
     def decide_move(self, valid_rounds):
         pass
+    
+    # Optional hook: players can track opponent state if needed
+    def update_state(self, opponent_move):
+        pass
 
 class randomBot(Player):
     def __init__(self, rounds):
@@ -25,6 +29,20 @@ class randomBot(Player):
         user_move = random.choice(['R', 'P', 'S'])
         return user_move
     
+class CopyCatBot(Player):
+    def __init__(self, rounds):
+        self.name = "CopyCatBot"
+        self.rounds = rounds
+        self.last_opponent_move = None
+
+    def decide_move(self, valid_rounds):
+        if self.last_opponent_move is None:
+            return random.choice(['R', 'P', 'S'])
+        return self.last_opponent_move
+
+    def update_state(self, opponent_move):
+        self.last_opponent_move = opponent_move
+
 
 class cyclicBot(Player):
     def __init__(self, rounds):
@@ -219,12 +237,15 @@ class Game:
         
         # Get player move
         user_move = self.player1.decide_move(self.valid_rounds)
-        if self.player1 != humanPlayer:
+        if not isinstance(self.player1, humanPlayer):
             print(f"Player1 played {MOVE_NAMES[user_move]}")
         
         
         # Update bot state
         self.bot.update_state(user_move)
+        
+        # Feed bot's move to player1 so it can learn/remember for next round
+        self.player1.update_state(bot_move)
         
         # Display bot move
         print(f"Bot played {MOVE_NAMES[bot_move]}")

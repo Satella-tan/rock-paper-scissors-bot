@@ -47,37 +47,164 @@ if 'last_result_type' not in st.session_state:
 if 'game_started' not in st.session_state:
     st.session_state.game_started = False
 
+# Custom CSS
+st.markdown("""
+<style>
+/* Prevent scrolling */
+.stApp {
+    background-color: #0E1117;
+    overflow: hidden;
+}
+.main .block-container {
+    max-width: 100%;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+/* Hide Streamlit default elements */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* Title styling */
+.game-title {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    color: #E5E7EB;
+    text-align: center;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+/* Round indicator */
+.round-indicator {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: #9CA3AF;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+/* Bot move letter */
+.bot-move {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 140px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 1;
+    margin: 30px 0 20px 0;
+    color: #E5E7EB;
+    min-height: 140px;
+}
+
+/* Placeholder text for bot move */
+.bot-move-placeholder {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #6B7280;
+    text-align: center;
+    margin: 30px 0 20px 0;
+    min-height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Result text */
+.result-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-align: center;
+    margin: 20px 0 40px 0;
+    min-height: 40px;
+}
+
+/* Button styling */
+button[kind="secondary"] {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace !important;
+    font-size: 48px !important;
+    font-weight: 600 !important;
+    background-color: #111827 !important;
+    border: 1px solid #374151 !important;
+    color: #E5E7EB !important;
+    border-radius: 6px !important;
+    padding: 30px !important;
+    height: auto !important;
+    min-height: 90px !important;
+    transition: all 0.2s ease !important;
+}
+
+button[kind="secondary"]:hover {
+    background-color: #1F2937 !important;
+    border-color: #4B5563 !important;
+}
+
+button[kind="secondary"]:active {
+    background-color: #111827 !important;
+}
+
+/* Subtle hint text */
+.hint-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    color: #9CA3AF;
+    text-align: center;
+    margin-top: 30px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # Game setup
 if not st.session_state.game_started:
-    rounds_input = st.number_input("How many rounds would you like to play?", min_value=1, max_value=100, value=15)
-    if st.button("Start Game"):
-        st.session_state.rounds = rounds_input
-        st.session_state.bot = EntropyBot(rounds_input)
-        st.session_state.game = Game(st.session_state.bot, rounds_input)
-        st.session_state.game_started = True
-        st.session_state.user_score = 0
-        st.session_state.bot_score = 0
-        st.rerun()
+    col_left, col_center, col_right = st.columns([1, 2, 1])
+    with col_center:
+        st.markdown("""
+        <div class="game-title">RPS — ENTROPY BOT</div>
+        """, unsafe_allow_html=True)
+        rounds_input = st.number_input("How many rounds would you like to play?", min_value=1, max_value=1000, value=35)
+        if st.button("Start Game", type="secondary", use_container_width=True):
+            st.session_state.rounds = rounds_input
+            st.session_state.bot = EntropyBot(rounds_input)
+            st.session_state.game = Game(st.session_state.bot, rounds_input)
+            st.session_state.game_started = True
+            st.session_state.user_score = 0
+            st.session_state.bot_score = 0
+            st.rerun()
+        st.markdown("""
+        <div class="hint-text">Bot adapting to your strategy</div>
+        """, unsafe_allow_html=True)
 
 # Main game interface
 if st.session_state.game_started:
     # Check if game is over
     if st.session_state.game.valid_rounds >= st.session_state.game.rounds:
-        st.header("Game Over!")
-        st.write(f"**Final Score:** You {st.session_state.game.user_score} - Bot {st.session_state.game.bot_score}")
-        st.write("**Your moves breakdown:**")
-        for move, idx in MOVE_INDEX.items():
-            count = st.session_state.bot.moves_count_real[idx]
-            st.write(f"- {MOVE_NAMES[move]}: {count}")
-        
-        if st.button("Play Again"):
-            st.session_state.game_started = False
-            st.session_state.game = None
-            st.session_state.bot = None
-            st.session_state.last_bot_move = None
-            st.session_state.last_result = None
-            st.session_state.last_result_type = None
-            st.rerun()
+        col_left, col_center, col_right = st.columns([1, 2, 1])
+        with col_center:
+            st.markdown("""
+            <div class="game-title">RPS — ENTROPY BOT</div>
+            """, unsafe_allow_html=True)
+            st.header("Game Over!")
+            st.write(f"**Final Score:** You {st.session_state.game.user_score} - Bot {st.session_state.game.bot_score}")
+            st.write("**Your moves breakdown:**")
+            for move, idx in MOVE_INDEX.items():
+                count = st.session_state.bot.moves_count_real[idx]
+                st.write(f"- {MOVE_NAMES[move]}: {count}")
+            if st.button("Play Again", type="secondary", use_container_width=True):
+                st.session_state.game_started = False
+                st.session_state.game = None
+                st.session_state.bot = None
+                st.session_state.last_bot_move = None
+                st.session_state.last_result = None
+                st.session_state.last_result_type = None
+                st.rerun()
+            st.markdown("""
+            <div class="hint-text">Bot adapting to your strategy</div>
+            """, unsafe_allow_html=True)
     else:
         # Result color mapping
         result_colors = {
@@ -86,117 +213,7 @@ if st.session_state.game_started:
             'tie': '#9CA3AF'    # neutral gray
         }
         
-        # Custom CSS
-        st.markdown("""
-        <style>
-        /* Prevent scrolling */
-        .stApp {
-            background-color: #0E1117;
-            overflow: hidden;
-        }
-        .main .block-container {
-            max-width: 100%;
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-        /* Hide Streamlit default elements */
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
-        
-        /* Title styling */
-        .game-title {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 26px;
-            font-weight: 500;
-            letter-spacing: 0.15em;
-            color: #E5E7EB;
-            text-align: center;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-        
-        /* Round indicator */
-        .round-indicator {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 15px;
-            font-weight: 400;
-            color: #9CA3AF;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        /* Bot move letter */
-        .bot-move {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 140px;
-            font-weight: 800;
-            text-align: center;
-            line-height: 1;
-            margin: 30px 0 20px 0;
-            color: #E5E7EB;
-            min-height: 140px;
-        }
-        
-        /* Placeholder text for bot move */
-        .bot-move-placeholder {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 16px;
-            font-weight: 400;
-            color: #6B7280;
-            text-align: center;
-            margin: 30px 0 20px 0;
-            min-height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Result text */
-        .result-text {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 28px;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-            text-align: center;
-            margin: 20px 0 40px 0;
-            min-height: 40px;
-        }
-        
-        /* Button styling */
-        button[kind="secondary"] {
-            font-family: 'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace !important;
-            font-size: 48px !important;
-            font-weight: 600 !important;
-            background-color: #111827 !important;
-            border: 1px solid #374151 !important;
-            color: #E5E7EB !important;
-            border-radius: 6px !important;
-            padding: 30px !important;
-            height: auto !important;
-            min-height: 90px !important;
-            transition: all 0.2s ease !important;
-        }
-        
-        button[kind="secondary"]:hover {
-            background-color: #1F2937 !important;
-            border-color: #4B5563 !important;
-        }
-        
-        button[kind="secondary"]:active {
-            background-color: #111827 !important;
-        }
-        
-        /* Subtle hint text */
-        .hint-text {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            font-size: 12px;
-            color: #9CA3AF;
-            text-align: center;
-            margin-top: 30px;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+
         
         # Main layout with columns [1,2,1]
         col_left, col_center, col_right = st.columns([1, 2, 1])

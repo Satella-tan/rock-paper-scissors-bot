@@ -170,18 +170,19 @@ class Game:
         self.bot_score = 0
         self.valid_rounds = 0
     
-    def play_round(self):
+    def play_round(self, answer):
         """
         Play a single round of the game.
+        Returns: (bot_move, result_string) where result_string is "tie", "user_win", or "bot_win"
         """
         # Bot decides its move
         bot_move = self.bot.decide_move(self.valid_rounds)
         
         # Get user move
-        user_move = input("What move would you like to play? (R,P,S): ").upper()
-        if user_move not in MOVE_INDEX:
+        user_move = answer.upper()
+        """if user_move not in MOVE_INDEX:
             print("Invalid move, please choose R, P or S")
-            return False
+            return False """
         
         # Update bot state
         self.bot.update_state(user_move)
@@ -189,30 +190,32 @@ class Game:
         # Display bot move
         print(f"Bot played {MOVE_NAMES[bot_move]}")
         
-        # Calculate scores
+        # Calculate scores and determine result
         if user_move == bot_move:
             # Tie, no score change
-            pass
+            result = "tie"
         elif ((user_move == "R" and bot_move == "S") or 
               (user_move == "P" and bot_move == "R") or 
               (user_move == "S" and bot_move == "P")):
             self.user_score += 1
+            result = "user_win"
         else:
             self.bot_score += 1
+            result = "bot_win"
         
         self.valid_rounds += 1
-        return True
+        return bot_move, result
     
     def play_game(self):
         """
-        Play a complete game.
+        Play a complete game (console version).
         """
         print("Winning of a round is +1 point")
         
         while self.valid_rounds < self.rounds:
-            round_valid = self.play_round()
-            if not round_valid:
-                continue
+            answer = input(f"Round {self.valid_rounds + 1}: Enter your move (R/P/S): ")
+            bot_move, result = self.play_round(answer)
+            # Continue regardless - invalid moves handled in play_round if needed
         
         # Print final results
         print(f"Your score : {self.user_score} | Bot score : {self.bot_score}")

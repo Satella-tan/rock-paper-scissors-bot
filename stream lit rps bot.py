@@ -3,7 +3,14 @@ import math
 import pandas as pd
 from rock_paper_scissors_entropy_bot import EntropyBot, Game, MOVE_INDEX, MOVE_NAMES
 
-st.set_page_config(layout="wide", page_title="RPS Entropy Bot", initial_sidebar_state="collapsed")
+
+favicon_path = "https://github.com/Satella-tan.png"
+st.set_page_config(
+    layout="wide", 
+    page_title="RPS Entropy Bot", 
+    initial_sidebar_state="collapsed", 
+    page_icon=favicon_path
+)
 
 def play_round(user_move):
     """Play a single round when a button is clicked"""
@@ -52,9 +59,9 @@ if 'game_started' not in st.session_state:
     st.session_state.game_started = False
 
 # Custom CSS 
-st.markdown("""
+# st.markdown("""
 
-""", unsafe_allow_html=True)
+# """, unsafe_allow_html=True)
 
 with open('./style.css') as f:
     css = f.read()
@@ -301,41 +308,113 @@ if st.session_state.game_started:
             # Footer text
             st.markdown('<div class="hint-text">Bot adapts to your strategy</div>', unsafe_allow_html=True)
         
-        # Right panel - Bot strategy info
-        
-        # with col_right:
-        #     st.markdown('<div class="section-title">Bot <span class="highlight">Strategy</span></div>', unsafe_allow_html=True)
+        # Right panel - Decision/Strategy (collapsible)
+        with col_right:
+            st.markdown('<div class="section-title">Decision / <span class="highlight">Strategy</span></div>', unsafe_allow_html=True)
             
-        #     if bot:
-        #         # Show bot parameters
-        #         params_html = f'''
-        #         <table class="stats-table">
-        #             <tr><th>Parameter</th><th>Value</th></tr>
-        #             <tr><td>Memory (k)</td><td class="cyan">{bot.k}</td></tr>
-        #             <tr><td>Smoothing (a)</td><td class="cyan">{bot.a}</td></tr>
-        #             <tr><td>Recent weight (b)</td><td class="cyan">{bot.b}</td></tr>
-        #             <tr><td>Decay (γ)</td><td class="cyan">{bot.gamma}</td></tr>
-        #             <tr><td>β max</td><td class="cyan">{bot.beta_max}</td></tr>
-        #         </table>
-        #         '''
-        #         st.markdown(params_html, unsafe_allow_html=True)
+            # Spoiler warning and toggle
+            if 'show_strategy' not in st.session_state:
+                st.session_state.show_strategy = False
+            st.session_state.show_strategy = st.checkbox("Show bot strategy", value=st.session_state.show_strategy, key="strategy_toggle")
+            
+            if st.session_state.show_strategy and bot:
+                st.markdown('<div style="margin-top: 15px;"></div>', unsafe_allow_html=True)
                 
-        #         st.markdown('<div style="margin-top: 20px;"></div>', unsafe_allow_html=True)
+                # Use stored values from bot
+                EU = bot.last_EU
+                softmax_probs = bot.last_softmax_probs
+                beta = bot.last_beta
+                epsilon = bot.last_epsilon
+                strategy_mode = bot.last_strategy
                 
-        #         # Recent probabilities
-        #         if sum(bot.empirical_prob_recent) > 0:
-        #             recent_html = '''
-        #             <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #666666; margin-bottom: 10px;">Recent probs:</div>
-        #             '''
-        #             for i, move in enumerate(['R', 'P', 'S']):
-        #                 prob = bot.empirical_prob_recent[i]
-        #                 pct = int(prob * 100)
-        #                 recent_html += f'''
-        #                 <div class="prob-row">
-        #                     <span class="prob-label">{move}</span>
-        #                     <div class="prob-bar-container"><div class="prob-bar" style="width:{pct}%;"></div></div>
-        #                     <span class="prob-value">{prob:.2f}</span>
-        #                 </div>
-        #                 '''
-        #             st.markdown(recent_html, unsafe_allow_html=True)
+                # Find best move (highest softmax prob)
+                best_move_idx = softmax_probs.index(max(softmax_probs))
+                best_move = ['R', 'P', 'S'][best_move_idx]
+                
+                # Section 1: Expected Utility
+                st.markdown('<div style="font-family: \'JetBrains Mono\', monospace; font-size: 12px; color: #666666; margin-bottom: 8px;">Expected payoff if bot plays...</div>', unsafe_allow_html=True)
+                
+                eu_html = ''
+                moves = ['R', 'P', 'S']
+                eu_range = max(abs(max(EU)), abs(min(EU)), 0.01)
+                
+                for i, move in enumerate(moves):
+                    eu_val = EU[i]
+                    if eu_val >= 0:
+                        bar_width = int((eu_val / eu_range) * 50) if eu_range > 0 else 0
+                        bar_color = "#4dd0e1"
+                        bar_style = f"margin-left: 50%; width: {bar_width}%;"
+                    else:
+                        bar_width = int((abs(eu_val) / eu_range) * 50) if eu_range > 0 else 0
+                        bar_color = "#c9453a"
+                        bar_style = f"margin-left: {50 - bar_width}%; width: {bar_width}%;"
+                    
+                    eu_html += f'''
+                    <div class="prob-row">
+                        <span class="prob-label">EU({move})</span>
+                        <div class="prob-bar-container" style="background: #1a1a1a; position: relative;">
+                            <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #333;"></div>
+                            <div class="prob-bar" style="{bar_style} background: {bar_color};"></div>
+                        </div>
+                        <span class="prob-value" style="color: {bar_color};">{eu_val:+.3f}</span>
+                    </div>
+                    '''
+                st.markdown(eu_html, unsafe_allow_html=True)
+                
+                st.markdown('<div style="margin-top: 20px;"></div>', unsafe_allow_html=True)
+                
+                # Section 2: Softmax Policy
+                st.markdown('<div style="font-family: \'JetBrains Mono\', monospace; font-size: 12px; color: #666666; margin-bottom: 8px;">Strategy probabilities:</div>', unsafe_allow_html=True)
+                
+                softmax_html = ''
+                for i, move in enumerate(moves):
+                    prob = softmax_probs[i]
+                    pct = int(prob * 100)
+                    is_best = (move == best_move)
+                    
+                    if is_best:
+                        label_style = "color: #c9b458; font-weight: 600;"
+                        bar_color = "#c9b458"
+                        arrow = " ←"
+                    else:
+                        label_style = "color: #888888;"
+                        bar_color = "#4dd0e1"
+                        arrow = ""
+                    
+                    softmax_html += f'''
+                    <div class="prob-row">
+                        <span class="prob-label" style="{label_style}">{MOVE_NAMES[move]}</span>
+                        <div class="prob-bar-container"><div class="prob-bar" style="width:{pct}%; background: {bar_color};"></div></div>
+                        <span class="prob-value" style="color: {bar_color};">{pct}%{arrow}</span>
+                    </div>
+                    '''
+                st.markdown(softmax_html, unsafe_allow_html=True)
+                
+                # Strategy mode indicator
+                strategy_labels = {
+                    "warmup": "Warmup (random)",
+                    "exploration": f"Exploration (ε={epsilon:.2f})",
+                    "softmax": "Softmax policy"
+                }
+                strategy_text = strategy_labels.get(strategy_mode, strategy_mode)
+                st.markdown(f'<div style="font-family: \'JetBrains Mono\', monospace; font-size: 11px; color: #538d4e; margin-top: 8px;">Mode: {strategy_text}</div>', unsafe_allow_html=True)
+                
+                st.markdown('<div style="margin-top: 20px;"></div>', unsafe_allow_html=True)
+                
+                # Section 3: Adaptation Parameters
+                st.markdown('<div style="font-family: \'JetBrains Mono\', monospace; font-size: 12px; color: #666666; margin-bottom: 8px;">Strategy parameters:</div>', unsafe_allow_html=True)
+                
+                params_html = f'''
+                <table class="stats-table">
+                    <tr><th>Param</th><th>Value</th></tr>
+                    <tr><td>β (inv. temp)</td><td class="cyan">{beta:.3f}</td></tr>
+                    <tr><td>ε (exploration)</td><td class="cyan">{epsilon:.3f}</td></tr>
+                    <tr><td>b (recent wt)</td><td class="cyan">{bot.b}</td></tr>
+                    <tr><td>γ (decay)</td><td class="cyan">{bot.gamma}</td></tr>
+                </table>
+                '''
+                st.markdown(params_html, unsafe_allow_html=True)
+            
+            elif not st.session_state.show_strategy:
+                st.markdown('<div style="font-family: \'JetBrains Mono\', monospace; font-size: 11px; color: #444444; margin-top: 10px;">Enable to see bot\'s decision process</div>', unsafe_allow_html=True)
 

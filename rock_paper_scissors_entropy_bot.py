@@ -40,6 +40,13 @@ class EntropyBot:
         self.deque_temp_moves_count = []    # Recent moves memory
         self.empirical_prob_recent = [0, 0, 0]  # Recent empirical probabilities
         
+        # Last decision data (for UI display)
+        self.last_EU = [0, 0, 0]
+        self.last_softmax_probs = [1/3, 1/3, 1/3]
+        self.last_beta = 0.0
+        self.last_epsilon = 0.25
+        self.last_strategy = "warmup"
+        
         # Calculate memory length
         self.k = self.calculate_recent_rounds(rounds)
     
@@ -64,6 +71,7 @@ class EntropyBot:
         
         # Probability for bot to make a random move (ghost emoji)
         epsilon = max(0.1, 0.25 * (1 - valid_rounds / self.rounds))
+        self.last_epsilon = epsilon
         
         # empirical probabilities EX.[0.5, 0.3, 0.2]
         n = sum(self.moves_count_real)
@@ -85,35 +93,35 @@ class EntropyBot:
         # print(f"Expected utility recent: {expected_utility_recent}")
         # print(f"Expected utility: {expected_utility}")
         
+        # Compute EU and softmax (always, for UI display)
+        beta = self.beta_max * (Hmax - entropy) / Hmax
+        self.last_beta = beta
+        
+        probs = empirical_prob_moves
+        EU = [
+            probs[2] - probs[1],  # Rock wins Scissors, loses to Paper
+            probs[0] - probs[2],  # Paper wins Rock, loses to Scissors
+            probs[1] - probs[0]   # Scissors wins Paper, loses to Rock
+        ]
+        self.last_EU = EU
+        
+        maxEU = max(EU)
+        expEU = [math.exp(beta * (u - maxEU)) for u in EU]
+        Z = sum(expEU)
+        softmax_probs = [x / Z for x in expEU]
+        self.last_softmax_probs = softmax_probs
+        
         # start random to test the waters
         if valid_rounds < (round(self.k/2)):
             bot_move = random.choice(['R', 'P', 'S'])
+            self.last_strategy = "warmup"
         # sometimes go random to explore
         elif random.random() < epsilon:
             bot_move = random.choice(['R', 'P', 'S'])
+            self.last_strategy = "exploration"
         # use entropy-based softmax for decision making
         else:
-            # map entropy to inverse temperature beta
-            beta = self.beta_max * (Hmax - entropy) / Hmax
-            # print(f"Beta (inverse temperature): {beta:.3f}")
-            
-            # compute expected utility for each move
-            probs = empirical_prob_moves
-            EU = [
-                probs[2] - probs[1],  # Rock wins Scissors, loses to Paper
-                probs[0] - probs[2],  # Paper wins Rock, loses to Scissors
-                probs[1] - probs[0]   # Scissors wins Paper, loses to Rock
-            ]
-            # print(f"EU for [R, P, S]: {EU}")
-            
-            # softmax to get adaptive action probabilities
-            maxEU = max(EU)
-            expEU = [math.exp(beta * (u - maxEU)) for u in EU]
-            Z = sum(expEU)
-            softmax_probs = [x / Z for x in expEU]
-            # print(f"Softmax probabilities: {softmax_probs}")
-            
-            # sample a move using those probabilities
+            # sample a move using softmax probabilities
             r = random.random()
             cumulative = 0
             bot_move = 'S'  # should never be the case
@@ -122,7 +130,7 @@ class EntropyBot:
                 if r < cumulative:
                     bot_move = ['R', 'P', 'S'][j]
                     break
-            # print("Bot strategy: Entropy-based softmax")
+            self.last_strategy = "softmax"
         
         return bot_move
     

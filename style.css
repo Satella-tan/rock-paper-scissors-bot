@@ -1,0 +1,280 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+/* Main app styling */
+.stApp {
+    background-color: #0a0a0a;
+}
+
+.main .block-container {
+    max-width: 100%;
+    padding: 40px 50px;
+}
+
+/* Hide Streamlit default elements */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+.stDeployButton {display: none;}
+[data-testid="stSidebar"] {display: none;}
+
+/* Section title styling */
+.section-title {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    font-weight: 400;
+    color: #888888;
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+}
+
+.section-title span.highlight {
+    color: #c9b458;
+}
+
+/* Main game title */
+.game-title {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: #888888;
+    text-align: center;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+}
+
+/* Round indicator */
+.round-indicator {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 400;
+    color: #666666;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Bot move display - large letter */
+.bot-move {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 120px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1;
+    margin: 20px 0;
+    color: #ffffff;
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bot-move-placeholder {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 400;
+    color: #444444;
+    text-align: center;
+    margin: 20px 0;
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Result text */
+.result-text {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    margin: 15px 0 30px 0;
+    min-height: 30px;
+}
+
+.result-win { color: #538d4e; }
+.result-lose { color: #c9453a; }
+.result-tie { color: #888888; }
+
+/* Score display */
+.score-display {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: #888888;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.score-display .score-value {
+    color: #4dd0e1;
+}
+
+/* Button styling */
+button[kind="secondary"] {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace !important;
+    font-size: 36px !important;
+    font-weight: 600 !important;
+    background-color: #1a1a1a !important;
+    border: 2px solid #3a3a3a !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    padding: 20px !important;
+    height: auto !important;
+    min-height: 80px !important;
+    transition: all 0.15s ease !important;
+}
+
+button[kind="secondary"]:hover {
+    background-color: #2a2a2a !important;
+    border-color: #4a4a4a !important;
+}
+
+button[kind="secondary"]:active {
+    background-color: #333333 !important;
+}
+
+/* Hint text */
+.hint-text {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #555555;
+    text-align: center;
+    margin-top: 25px;
+}
+
+/* Stats table styling */
+.stats-table {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stats-table th {
+    font-size: 13px;
+    font-weight: 400;
+    color: #888888;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #333333;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.stats-table td {
+    font-size: 14px;
+    padding: 10px 12px;
+    color: #ffffff;
+}
+
+.stats-table td.cyan {
+    color: #4dd0e1;
+}
+
+.stats-table td.yellow {
+    color: #c9b458;
+}
+
+.stats-table td.gray {
+    color: #666666;
+}
+
+/* Entropy bar */
+.entropy-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+}
+
+.entropy-label {
+    font-size: 13px;
+    color: #888888;
+    min-width: 70px;
+}
+
+.entropy-bar-container {
+    flex: 1;
+    height: 8px;
+    background: #1a1a1a;
+    border-radius: 2px;
+}
+
+.entropy-bar {
+    height: 100%;
+    background: #4dd0e1;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.entropy-value {
+    font-size: 13px;
+    color: #4dd0e1;
+    min-width: 80px;
+    text-align: right;
+}
+
+/* Move history */
+.move-history {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #666666;
+    background: #0f0f0f;
+    border: 1px solid #222222;
+    border-radius: 4px;
+    padding: 12px;
+    margin-top: 15px;
+    word-wrap: break-word;
+}
+
+/* Probability bars */
+.prob-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0;
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace;
+    font-size: 13px;
+}
+
+.prob-label {
+    color: #888888;
+    min-width: 80px;
+}
+
+.prob-bar-container {
+    flex: 1;
+    height: 12px;
+    background: #1a1a1a;
+}
+
+.prob-bar {
+    height: 100%;
+    background: #4dd0e1;
+}
+
+.prob-value {
+    color: #4dd0e1;
+    min-width: 35px;
+    text-align: right;
+}
+
+/* Number input styling */
+.stNumberInput > div > div > input {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace !important;
+    background-color: #1a1a1a !important;
+    border: 1px solid #333333 !important;
+    color: #ffffff !important;
+}
+
+.stNumberInput label {
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace !important;
+    color: #888888 !important;
+}
+
+/* Hide progress bar default styling */
+.stProgress > div > div > div > div {
+    background-color: #4dd0e1 !important;
+}
+
+.stProgress > div > div {
+    background-color: #1a1a1a !important;
+}

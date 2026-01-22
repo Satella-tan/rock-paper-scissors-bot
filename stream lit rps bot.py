@@ -302,39 +302,40 @@ if st.session_state.game_started:
             st.markdown('<div class="hint-text">Bot adapts to your strategy</div>', unsafe_allow_html=True)
         
         # Right panel - Bot strategy info
-        with col_right:
-            st.markdown('<div class="section-title">Bot <span class="highlight">Strategy</span></div>', unsafe_allow_html=True)
+        
+        # with col_right:
+        #     st.markdown('<div class="section-title">Bot <span class="highlight">Strategy</span></div>', unsafe_allow_html=True)
             
-            if bot:
-                # Show bot parameters
-                params_html = f'''
-                <table class="stats-table">
-                    <tr><th>Parameter</th><th>Value</th></tr>
-                    <tr><td>Memory (k)</td><td class="cyan">{bot.k}</td></tr>
-                    <tr><td>Smoothing (a)</td><td class="cyan">{bot.a}</td></tr>
-                    <tr><td>Recent weight (b)</td><td class="cyan">{bot.b}</td></tr>
-                    <tr><td>Decay (γ)</td><td class="cyan">{bot.gamma}</td></tr>
-                    <tr><td>β max</td><td class="cyan">{bot.beta_max}</td></tr>
-                </table>
-                '''
-                st.markdown(params_html, unsafe_allow_html=True)
+        #     if bot:
+        #         # Show bot parameters
+        #         params_html = f'''
+        #         <table class="stats-table">
+        #             <tr><th>Parameter</th><th>Value</th></tr>
+        #             <tr><td>Memory (k)</td><td class="cyan">{bot.k}</td></tr>
+        #             <tr><td>Smoothing (a)</td><td class="cyan">{bot.a}</td></tr>
+        #             <tr><td>Recent weight (b)</td><td class="cyan">{bot.b}</td></tr>
+        #             <tr><td>Decay (γ)</td><td class="cyan">{bot.gamma}</td></tr>
+        #             <tr><td>β max</td><td class="cyan">{bot.beta_max}</td></tr>
+        #         </table>
+        #         '''
+        #         st.markdown(params_html, unsafe_allow_html=True)
                 
-                st.markdown('<div style="margin-top: 20px;"></div>', unsafe_allow_html=True)
+        #         st.markdown('<div style="margin-top: 20px;"></div>', unsafe_allow_html=True)
                 
-                # Recent probabilities
-                if sum(bot.empirical_prob_recent) > 0:
-                    recent_html = '''
-                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #666666; margin-bottom: 10px;">Recent probs:</div>
-                    '''
-                    for i, move in enumerate(['R', 'P', 'S']):
-                        prob = bot.empirical_prob_recent[i]
-                        pct = int(prob * 100)
-                        recent_html += f'''
-                        <div class="prob-row">
-                            <span class="prob-label">{move}</span>
-                            <div class="prob-bar-container"><div class="prob-bar" style="width:{pct}%;"></div></div>
-                            <span class="prob-value">{prob:.2f}</span>
-                        </div>
-                        '''
-                    st.markdown(recent_html, unsafe_allow_html=True)
+        #         # Recent probabilities
+        #         if sum(bot.empirical_prob_recent) > 0:
+        #             recent_html = '''
+        #             <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #666666; margin-bottom: 10px;">Recent probs:</div>
+        #             '''
+        #             for i, move in enumerate(['R', 'P', 'S']):
+        #                 prob = bot.empirical_prob_recent[i]
+        #                 pct = int(prob * 100)
+        #                 recent_html += f'''
+        #                 <div class="prob-row">
+        #                     <span class="prob-label">{move}</span>
+        #                     <div class="prob-bar-container"><div class="prob-bar" style="width:{pct}%;"></div></div>
+        #                     <span class="prob-value">{prob:.2f}</span>
+        #                 </div>
+        #                 '''
+        #             st.markdown(recent_html, unsafe_allow_html=True)
 
